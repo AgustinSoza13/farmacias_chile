@@ -1,0 +1,1 @@
+Creacion de una rest api, la cual servara para servir don tipos de farmacias, las farmacias de chile o las farmacias de turnos.
