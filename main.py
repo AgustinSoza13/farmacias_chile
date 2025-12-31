@@ -3,7 +3,7 @@ import requests
 import asyncio 
 import uvicorn
 import cloudscraper
-
+import os
 app = FastAPI()
 
 API_1 = "https://midas.minsal.cl/farmacia_v2/WS/getLocalesTurnos.php" # locales de turno
@@ -90,4 +90,5 @@ def get_fuente_dos(comuna: str = None, localidad: str = None):
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=9000)
+    port = int(os.getenv("PORT",8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
