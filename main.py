@@ -1,8 +1,6 @@
 from fastapi import FastAPI,HTTPException
 from fastapi.concurrency import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import requests 
-import asyncio 
 import uvicorn
 import cloudscraper
 from sqlmodel import delete
@@ -39,7 +37,7 @@ def scraper_minsal(API):
     scraper = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
     )
-    return scraper.get(API, timeout=1).json()
+    return scraper.get(API, timeout=3)
 
 class Farmacia(SQLModel, table=True):
     id: int|None = Field(default=None, primary_key=True)
@@ -67,6 +65,7 @@ def get_fuente_uno(comuna: str = None, localidad: str = None):
             with Session(engine) as session:
                 farmacias = session.exec(select(Farmacia)).all()
                 data = [f.model_dump() for f in farmacias]
+                #TODO revisar en algun momento para los casos que este el documento
             """raise HTTPException(
                 status_code=resp.status_code, 
                 detail=f"Cloudflare persiste en el bloqueo: {resp.status_code}"
@@ -74,7 +73,6 @@ def get_fuente_uno(comuna: str = None, localidad: str = None):
         else:
             data = resp.json()
 
-        # Filtrado manual en Python (Minsal ignora los parámetros de la URL)
         if comuna:
             data = [f for f in data if comuna.upper() in f.get("comuna_nombre", "").upper()]
         
