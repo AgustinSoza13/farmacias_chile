@@ -62,14 +62,18 @@ def get_fuente_uno(comuna: str = None, localidad: str = None):
     try:
         resp = scraper_minsal(API_2)
         if resp.status_code != 200:
-            with Session(engine) as session:
-                farmacias = session.exec(select(Farmacia)).all()
-                data = [f.model_dump() for f in farmacias]
+            #with Session(engine) as session:
+            #    farmacias = session.exec(select(Farmacia)).all()
+            #    data = [f.model_dump() for f in farmacias]
                 #TODO revisar en algun momento para los casos que este el documento
-            """raise HTTPException(
+            print("STATUS:", resp.status_code)
+            print("HEADERS:", resp.headers)
+            print("BODY:", resp.text[:500])
+            raise HTTPException(
                 status_code=resp.status_code, 
                 detail=f"Cloudflare persiste en el bloqueo: {resp.status_code}"
-            )"""
+            )
+            
         else:
             data = resp.json()
 
@@ -94,6 +98,9 @@ def get_fuente_dos(comuna: str = None, localidad: str = None):
         
         if resp.status_code != 200:
             # Si sigue dando 403, Cloudflare detectó el entorno de servidor
+            print("STATUS:", resp.status_code)
+            print("HEADERS:", resp.headers)
+            print("BODY:", resp.text[:500])
             raise HTTPException(
                 status_code=resp.status_code, 
                 detail=f"Cloudflare persiste en el bloqueo: {resp.status_code}"
