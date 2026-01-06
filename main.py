@@ -35,9 +35,13 @@ engine = create_engine(sqlite_url)
 # Creamos el scraper que simula un navegador (Chrome en este caso)
 def scraper_minsal(API):
     scraper = cloudscraper.create_scraper(
-        browser={'browser': 'firefox', 'platform': 'windows', 'desktop': True,'mobile': False}
+        browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True,'mobile': False}
     )
-    return scraper.get(API,headers={'Referer': 'https://www.minsal.cl/'}, timeout=3)
+    headers = {
+        "Referer": "https://midas.minsal.cl/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+    }
+    return scraper.get(API,headers=headers, timeout=15)
 
 class Farmacia(SQLModel, table=True):
     id: int|None = Field(default=None, primary_key=True)
