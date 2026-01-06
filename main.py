@@ -32,10 +32,11 @@ sqlite_file_name = "farmacias.db"
 
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 engine = create_engine(sqlite_url)
+
 # Creamos el scraper que simula un navegador (Chrome en este caso)
 def scraper_minsal(API):
     scraper = cloudscraper.create_scraper(
-        browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True,'mobile': False}
+        browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
     )
     headers = {
         "Referer": "https://midas.minsal.cl/",
@@ -50,6 +51,9 @@ class Farmacia(SQLModel, table=True):
     comuna_nombre: str
     local_lat: str
     local_lng: str
+    local_telefono: str
+    #funcionamiento_hora_apertura: 
+    #funcionamiento_hora_cierre:
 
 def extraccion_data_relevante(data):
     item = {
@@ -57,7 +61,10 @@ def extraccion_data_relevante(data):
             "direccion": data.get("local_direccion"),
             "comuna": data.get("comuna_nombre"),
             "local_lat":data.get("local_lat"),
-            "local_lng":data.get("local_lng")
+            "local_lng":data.get("local_lng"),
+            "local_telefono":data.get("local_telefono"),
+            "funcionamiento_hora_apertura":data.get("funcionamiento_hora_apertura"),
+            "funcionamiento_hora_cierre":data.get("funcionamiento_hora_cierre")
         }
     return item
 
@@ -65,6 +72,11 @@ def extraccion_data_relevante(data):
 def get_fuente_uno(comuna: str = None, localidad: str = None):
     try:
         resp = scraper_minsal(API_2)
+        if resp.status_code==403:
+            for i in range(0,3):
+                resp = scraper_minsal(API_2)
+                if resp.status_code==200:
+                    break
         if resp.status_code != 200:
             #with Session(engine) as session:
             #    farmacias = session.exec(select(Farmacia)).all()
@@ -99,7 +111,11 @@ def get_fuente_dos(comuna: str = None, localidad: str = None):
     try:
         # Hacemos la petición
         resp = scraper_minsal(API_1)
-        
+        if resp.status_code==403:
+            for i in range(0,3):
+                resp = scraper_minsal(API_2)
+                if resp.status_code==200:
+                    break
         if resp.status_code != 200:
             # Si sigue dando 403, Cloudflare detectó el entorno de servidor
             print("STATUS:", resp.status_code)
