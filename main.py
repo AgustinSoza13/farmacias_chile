@@ -35,14 +35,24 @@ engine = create_engine(sqlite_url)
 
 # Creamos el scraper que simula un navegador (Chrome en este caso)
 def scraper_minsal(API):
-    scraper = cloudscraper.create_scraper(
+    """scraper = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
     )
     headers = {
         "Referer": "https://midas.minsal.cl/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
     }
-    return scraper.get(API,headers=headers, timeout=15)
+    return scraper.get(API,headers=headers, timeout=15)"""
+    scraper = cloudscraper.create_scraper()
+    headers = {
+        # User-Agent de un iPhone real
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        "Accept": "application/json",
+        "Accept-Language": "es-CL,es;q=0.9",
+        "Referer": "https://midas.minsal.cl/",
+        "Connection": "keep-alive"
+    }
+    return scraper.get(API, headers=headers, timeout=15)
 
 class Farmacia(SQLModel, table=True):
     id: int|None = Field(default=None, primary_key=True)
@@ -113,6 +123,7 @@ def get_fuente_dos(comuna: str = None, localidad: str = None):
         resp = scraper_minsal(API_1)
         if resp.status_code==403:
             for i in range(0,3):
+                print("intento :",i)
                 resp = scraper_minsal(API_2)
                 if resp.status_code==200:
                     break
